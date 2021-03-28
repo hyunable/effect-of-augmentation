@@ -1,2 +1,4 @@
-# effect-of-augmentation
-Exploring the importance and effectiveness of data augmentation
+# effect-of-augmentation for coreml updatable
+
+## Requirement
+- make `doodle_dataset` folder in this directory
