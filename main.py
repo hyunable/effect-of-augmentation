@@ -9,6 +9,10 @@ from network import VGG11
 from trainer import VGG11Trainer
 from utils import process_config
 
+seed = 480
+random.seed(seed)
+np.random.seed(seed)
+tf.random.set_seed(seed)
 
 def main(config_path: str):
     config = process_config(config_path)
@@ -19,11 +23,6 @@ def main(config_path: str):
 
 
 if __name__ == "__main__":
-    seed = 480
-    random.seed(seed)
-    np.random.seed(seed)
-    tf.random.set_seed(seed)
-
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", type=str, default="config-vanilla.yaml", help="config path to use")
     args = vars(ap.parse_args())

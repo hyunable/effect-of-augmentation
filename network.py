@@ -27,9 +27,7 @@ class VGG11():
         x = conv_block_2d(x, 512, kernel_size=3, strides=1, pad_type="reflect", useBN=True, activation="lrelu")
         x = MaxPooling2D()(x)
         x = Flatten()(x)
-        x = Dense(100)(x)
-        x = LeakyReLU(0.2)(x)
-        x = Dense(10)(x)
+        x = Dense(3)(x)
         scores = Activation("softmax")(x)
         return Model(img, scores, name=model_name)
 

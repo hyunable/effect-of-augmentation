@@ -3,6 +3,8 @@ from functools import partial
 import numpy as np
 import scipy.ndimage as ndimage
 import tensorflow as tf
+import os
+from sklearn.model_selection import train_test_split
 from tensorflow.keras.datasets import mnist
 
 from utils import scalar_to_onehot, normalize_img
@@ -21,12 +23,37 @@ def _gaussain_noise(img_arr, var=0.1):
     return img_noisy
 
 
+def load_doodle_data():
+    target_folder = "doodle_dataset"
+    train_size = 0.7
+    npy_names = os.listdir(target_folder)
+
+    full_images = np.zeros((0, 28, 28))
+    full_labels = np.zeros((0))
+
+    for category_idx, npy_name in enumerate(npy_names):
+        npy_path_for_a_category = os.path.join(target_folder, npy_name)
+        category_name = npy_name.split(".")[0]
+
+        data = np.load(npy_path_for_a_category)
+        number_of_data = data.shape[0]
+
+        images = data.reshape(-1, 28, 28)
+        labels = np.full((number_of_data), category_idx)
+
+        full_images = np.concatenate((full_images, images), 0)
+        full_labels = np.concatenate((full_labels, labels), 0)
+
+    full_labels = full_labels.astype(int)
+    return train_test_split(full_images, full_labels, train_size=train_size, shuffle=True, random_state=2021)
+
+
 def create_dataset(config):
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    x_train, x_test, y_train, y_test = load_doodle_data()
     x_train = normalize_img(x_train)
     x_test = normalize_img(x_test)
-    y_train_oh = scalar_to_onehot(y_train, 10)
-    y_test_oh = scalar_to_onehot(y_test, 10)
+    y_train_oh = scalar_to_onehot(y_train, 3)
+    y_test_oh = scalar_to_onehot(y_test, 3)
     image_train = tf.data.Dataset.from_tensor_slices(x_train[..., np.newaxis])
     label_train = tf.data.Dataset.from_tensor_slices(y_train_oh)
     image_test = tf.data.Dataset.from_tensor_slices(x_test[..., np.newaxis])
@@ -38,8 +65,6 @@ def create_dataset(config):
         [image_tensor, ] = tf.py_function(random_rotate, [img_tensor], [tf.float32])
         image_tensor.set_shape(im_shape)
         return image_tensor
-
-
 
     if config.data.augmentation:
         gaussian_noise_aug = partial(_gaussain_noise, var=0.5)
